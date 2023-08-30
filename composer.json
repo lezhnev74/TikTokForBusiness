@@ -1,6 +1,6 @@
 {
-    "name": "socialiteproviders/tiktok",
-    "description": "TikTok (tiktok.com) OAuth2 Provider for Laravel Socialite",
+    "name": "lezhnev74/laravel-socialite-tiktok-business",
+    "description": "TikTok For Business OAuth2 Provider for Laravel Socialite",
     "license": "MIT",
     "keywords": [
         "laravel",
@@ -9,24 +9,13 @@
         "socialite",
         "tiktok"
     ],
-    "authors": [
-        {
-            "name": "Thomas Banks",
-            "email": "thomas@tombanks.me"
-        }
-    ],
-    "support": {
-        "issues": "https://github.com/socialiteproviders/providers/issues",
-        "source": "https://github.com/socialiteproviders/providers",
-        "docs": "https://socialiteproviders.com/tiktok"
-    },
     "require": {
         "php": "^8.0",
         "socialiteproviders/manager": "^4.4"
     },
     "autoload": {
         "psr-4": {
-            "SocialiteProviders\\TikTok\\": ""
+            "Lezhnev74\\TikTokBusiness\\": ""
         }
     }
 }

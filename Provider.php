@@ -1,6 +1,6 @@
 <?php
 
-namespace SocialiteProviders\TikTok;
+namespace Lezhnev74\TikTokBusiness;
 
 use Illuminate\Support\Arr;
 use Laravel\Socialite\Two\InvalidStateException;
@@ -8,8 +8,7 @@ use SocialiteProviders\Manager\OAuth2\AbstractProvider;
 use SocialiteProviders\Manager\OAuth2\User;
 
 /**
- * @see https://developers.tiktok.com/bulletin/migration-guidance-oauth-v1/
- * @see https://developers.tiktok.com/doc/oauth-user-access-token-management
+ * https://business-api.tiktok.com/portal/docs?rid=w08mdqof6nq&id=1738373164380162
  */
 class Provider extends AbstractProvider
 {
@@ -18,9 +17,7 @@ class Provider extends AbstractProvider
     /**
      * {@inheritdoc}
      */
-    protected $scopes = [
-        'user.info.basic',
-    ];
+    protected $scopes = [];
 
     /**
      * @var User
@@ -33,16 +30,14 @@ class Provider extends AbstractProvider
     protected function getAuthUrl($state)
     {
         $fields = [
-            'client_key'    => $this->clientId,
-            'state'         => $state,
-            'response_type' => 'code',
-            'scope'         => $this->formatScopes($this->getScopes(), $this->scopeSeparator),
-            'redirect_uri'  => $this->redirectUrl,
+            'app_id' => $this->clientId,
+            'state' => $state,
+            'redirect_uri' => $this->redirectUrl,
         ];
 
         $fields = array_merge($fields, $this->parameters);
 
-        return 'https://www.tiktok.com/v2/auth/authorize/?'.http_build_query($fields);
+        return 'https://business-api.tiktok.com/portal/auth?' . http_build_query($fields);
     }
 
     /**
@@ -58,18 +53,19 @@ class Provider extends AbstractProvider
             throw new InvalidStateException();
         }
 
+        // https://business-api.tiktok.com/portal/docs?rid=w08mdqof6nq&id=1739965703387137
         $response = $this->getAccessTokenResponse($this->getCode());
+        \Log::debug("TIKTOK", $response);
 
-        $token = Arr::get($response, 'access_token');
+        $token = Arr::get($response, 'data.access_token');
+        $scopes = Arr::get($response, 'data.scope', []);
 
         $this->user = $this->mapUserToObject(
             $this->getUserByToken($token)
         );
 
         return $this->user->setToken($token)
-            ->setExpiresIn(Arr::get($response, 'expires_in'))
-            ->setRefreshToken(Arr::get($response, 'refresh_token'))
-            ->setApprovedScopes(explode($this->scopeSeparator, Arr::get($response, 'scope', '')));
+            ->setApprovedScopes($scopes);
     }
 
     /**
@@ -77,7 +73,7 @@ class Provider extends AbstractProvider
      */
     public function getTokenUrl()
     {
-        return 'https://open.tiktokapis.com/v2/oauth/token/';
+        return 'https://business-api.tiktok.com/open_api/v1.3/oauth2/access_token/';
     }
 
     /**
@@ -86,11 +82,11 @@ class Provider extends AbstractProvider
     protected function getTokenFields($code)
     {
         return [
-            'client_key'    => $this->clientId,
+            'client_key' => $this->clientId,
             'client_secret' => $this->clientSecret,
-            'code'          => $code,
-            'grant_type'    => 'authorization_code',
-            'redirect_uri'  => $this->redirectUrl,
+            'code' => $code,
+            'grant_type' => 'authorization_code',
+            'redirect_uri' => $this->redirectUrl,
         ];
     }
 
@@ -99,16 +95,17 @@ class Provider extends AbstractProvider
      */
     protected function getUserByToken($token)
     {
+        // https://business-api.tiktok.com/portal/docs?rid=w08mdqof6nq&id=1739665513181185
         $response = $this->getHttpClient()->get(
-            'https://open.tiktokapis.com/v2/user/info/?fields=open_id,union_id,display_name,avatar_large_url',
+            'https://business-api.tiktok.com/open_api/v1.3/user/info/',
             [
                 'headers' => [
-                    'Authorization' => 'Bearer '.$token,
+                    'Access-Token' => $token,
                 ],
             ]
         );
 
-        return json_decode((string) $response->getBody(), true);
+        return json_decode((string)$response->getBody(), true);
     }
 
     /**
@@ -116,13 +113,12 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject($user)
     {
-        $user = $user['data']['user'];
+        $user = $user['data'];
 
         return (new User())->setRaw($user)->map([
-            'id'       => $user['open_id'],
-            'union_id' => $user['union_id'] ?? null,
-            'name'     => $user['display_name'],
-            'avatar'   => $user['avatar_large_url'],
+            'id' => $user['core_user_id'],
+            'name' => $user['display_name'],
+            'avatar' => $user['avatar_url'],
         ]);
     }
 
@@ -132,7 +128,7 @@ class Provider extends AbstractProvider
     protected function getTokenHeaders($code)
     {
         return [
-            'Accept'       => 'application/json',
+            'Accept' => 'application/json',
             'Content-Type' => 'application/x-www-form-urlencoded',
         ];
     }

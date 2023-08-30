@@ -1,7 +1,7 @@
 # TikTok
 
 ```bash
-composer require socialiteproviders/tiktok
+composer require lezhnev74/tiktok-business
 ```
 
 ## Installation & Basic Usage

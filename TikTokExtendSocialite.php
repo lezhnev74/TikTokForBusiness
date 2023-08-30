@@ -1,6 +1,6 @@
 <?php
 
-namespace SocialiteProviders\TikTok;
+namespace Lezhnev74\TikTokBusiness;
 
 use SocialiteProviders\Manager\SocialiteWasCalled;
 
