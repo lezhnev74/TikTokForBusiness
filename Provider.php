@@ -12,7 +12,7 @@ use SocialiteProviders\Manager\OAuth2\User;
  */
 class Provider extends AbstractProvider
 {
-    public const IDENTIFIER = 'TIKTOK';
+    public const IDENTIFIER = 'TIKTOK_BUSINESS';
 
     /**
      * {@inheritdoc}

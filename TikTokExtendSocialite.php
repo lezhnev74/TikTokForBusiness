@@ -13,6 +13,6 @@ class TikTokExtendSocialite
      */
     public function handle(SocialiteWasCalled $socialiteWasCalled)
     {
-        $socialiteWasCalled->extendSocialite('tiktok', Provider::class);
+        $socialiteWasCalled->extendSocialite('tiktok_business', Provider::class);
     }
 }
