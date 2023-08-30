@@ -129,7 +129,7 @@ class Provider extends AbstractProvider
     {
         return [
             'Accept' => 'application/json',
-            'Content-Type' => 'application/x-www-form-urlencoded',
+            'Content-Type' => 'application/json',
         ];
     }
 }
