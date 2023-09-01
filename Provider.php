@@ -83,8 +83,6 @@ class Provider extends AbstractProvider
             RequestOptions::JSON => $this->getTokenFields($code),
         ]);
 
-        \Log::debug(Message::toString($response));
-
         return json_decode($response->getBody(), true);
     }
 
