@@ -2,6 +2,8 @@
 
 namespace Lezhnev74\TikTokBusiness;
 
+use GuzzleHttp\Psr7\Message;
+use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Arr;
 use Laravel\Socialite\Two\InvalidStateException;
 use SocialiteProviders\Manager\OAuth2\AbstractProvider;
@@ -36,7 +38,6 @@ class Provider extends AbstractProvider
         ];
 
         $fields = array_merge($fields, $this->parameters);
-
         return 'https://business-api.tiktok.com/portal/auth?' . http_build_query($fields);
     }
 
@@ -55,7 +56,6 @@ class Provider extends AbstractProvider
 
         // https://business-api.tiktok.com/portal/docs?rid=w08mdqof6nq&id=1739965703387137
         $response = $this->getAccessTokenResponse($this->getCode());
-        \Log::debug("TIKTOK", $response);
 
         $token = Arr::get($response, 'data.access_token');
         $scopes = Arr::get($response, 'data.scope', []);
@@ -76,17 +76,27 @@ class Provider extends AbstractProvider
         return 'https://business-api.tiktok.com/open_api/v1.3/oauth2/access_token/';
     }
 
+    public function getAccessTokenResponse($code)
+    {
+        $response = $this->getHttpClient()->post($this->getTokenUrl(), [
+            RequestOptions::HEADERS => $this->getTokenHeaders($code),
+            RequestOptions::JSON => $this->getTokenFields($code),
+        ]);
+
+        \Log::debug(Message::toString($response));
+
+        return json_decode($response->getBody(), true);
+    }
+
     /**
      * {@inheritdoc}
      */
     protected function getTokenFields($code)
     {
         return [
-            'client_key' => $this->clientId,
-            'client_secret' => $this->clientSecret,
-            'code' => $code,
-            'grant_type' => 'authorization_code',
-            'redirect_uri' => $this->redirectUrl,
+            'app_id' => (string)$this->clientId,
+            'secret' => (string)$this->clientSecret,
+            'auth_code' => $code,
         ];
     }
 
