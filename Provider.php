@@ -2,7 +2,6 @@
 
 namespace Lezhnev74\TikTokBusiness;
 
-use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Arr;
 use Laravel\Socialite\Two\InvalidStateException;
